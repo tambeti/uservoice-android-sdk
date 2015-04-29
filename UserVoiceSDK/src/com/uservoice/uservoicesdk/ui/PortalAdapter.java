@@ -1,11 +1,12 @@
 package com.uservoice.uservoicesdk.ui;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v4.app.FragmentActivity;
+import android.telephony.PhoneStateListener;
+import android.telephony.ServiceState;
+import android.telephony.TelephonyManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +27,9 @@ import com.uservoice.uservoicesdk.model.Forum;
 import com.uservoice.uservoicesdk.model.Suggestion;
 import com.uservoice.uservoicesdk.model.Topic;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PortalAdapter extends SearchAdapter<BaseModel> implements AdapterView.OnItemClickListener {
 
     public static int SCOPE_ALL = 0;
@@ -39,12 +43,15 @@ public class PortalAdapter extends SearchAdapter<BaseModel> implements AdapterVi
     private static int CONTACT = 4;
     private static int ARTICLE = 5;
     private static int POWERED_BY = 6;
+    private static int CONTACT_HEADER = 7;
+    private static int CALL = 8;
 
     private LayoutInflater inflater;
     private final FragmentActivity context;
     private boolean configLoaded = false;
     private List<Integer> staticRows;
     private List<Article> articles;
+    private boolean havePhone = false;
 
     public PortalAdapter(FragmentActivity context) {
         this.context = context;
@@ -59,6 +66,9 @@ public class PortalAdapter extends SearchAdapter<BaseModel> implements AdapterVi
                 loadTopics();
             }
         }).init();
+
+        final TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        tm.listen(phoneListener, PhoneStateListener.LISTEN_SERVICE_STATE);
     }
 
     private List<Topic> getTopics() {
@@ -113,9 +123,11 @@ public class PortalAdapter extends SearchAdapter<BaseModel> implements AdapterVi
         if (staticRows == null) {
             staticRows = new ArrayList<Integer>();
             Config config = Session.getInstance().getConfig(context);
-            if (config.shouldShowContactUs())
+            if (config.shouldShowContactUs()) {
+                staticRows.add(CONTACT_HEADER);
                 staticRows.add(CONTACT);
-            if (config.shouldShowForum())
+                staticRows.add(CALL);
+            } if (config.shouldShowForum())
                 staticRows.add(FORUM);
             if (config.shouldShowKnowledgeBase())
                 staticRows.add(KB_HEADER);
@@ -188,7 +200,9 @@ public class PortalAdapter extends SearchAdapter<BaseModel> implements AdapterVi
         computeStaticRows();
         if (position < staticRows.size()) {
             int type = staticRows.get(position);
-            if (type == KB_HEADER || type == LOADING)
+            if (type == KB_HEADER || type == LOADING || type == CONTACT_HEADER)
+                return false;
+            if (type == CALL && !havePhone)
                 return false;
         }
         return true;
@@ -226,6 +240,10 @@ public class PortalAdapter extends SearchAdapter<BaseModel> implements AdapterVi
                 view = inflater.inflate(R.layout.uv_text_item, null);
             else if (type == POWERED_BY)
             	view = inflater.inflate(R.layout.uv_powered_by_item, null);
+            else if (type == CONTACT_HEADER)
+                view = inflater.inflate(R.layout.uv_header_item_light, null);
+            else if (type == CALL)
+                view = inflater.inflate(R.layout.uv_text_item, null);
         }
 
         if (type == FORUM) {
@@ -249,7 +267,7 @@ public class PortalAdapter extends SearchAdapter<BaseModel> implements AdapterVi
             }
         } else if (type == CONTACT) {
             TextView textView = (TextView) view.findViewById(R.id.uv_text);
-            textView.setText(R.string.uv_contact_us);
+            textView.setText(R.string.uv_write_us);
             view.findViewById(R.id.uv_text2).setVisibility(View.GONE);
         } else if (type == ARTICLE) {
             TextView textView = (TextView) view.findViewById(R.id.uv_text);
@@ -258,6 +276,13 @@ public class PortalAdapter extends SearchAdapter<BaseModel> implements AdapterVi
         } else if (type == POWERED_BY) {
         	TextView textView = (TextView) view.findViewById(R.id.uv_version);
         	textView.setText(context.getString(R.string.uv_android_sdk) + " v" + UserVoice.getVersion());
+        } else if (type == CONTACT_HEADER) {
+            TextView textView = (TextView) view.findViewById(R.id.uv_header_text);
+            textView.setText(R.string.uv_contact_us);
+        } else if (type == CALL) {
+            TextView textView = (TextView) view.findViewById(R.id.uv_text);
+            textView.setText(R.string.uv_contact_phone);
+            view.findViewById(R.id.uv_text2).setVisibility(View.GONE);
         }
 
         View divider = view.findViewById(R.id.uv_divider);
@@ -271,7 +296,7 @@ public class PortalAdapter extends SearchAdapter<BaseModel> implements AdapterVi
 
     @Override
     public int getViewTypeCount() {
-        return 7;
+        return 9;
     }
 
     @Override
@@ -306,7 +331,17 @@ public class PortalAdapter extends SearchAdapter<BaseModel> implements AdapterVi
             context.startActivity(new Intent(context, ForumActivity.class));
         } else if (type == TOPIC || type == ARTICLE) {
             Utils.showModel(context, (BaseModel) getItem(position));
+        } else if (type == CALL && havePhone) {
+            final Intent intent = new Intent(Intent.ACTION_DIAL);
+            intent.setData(Uri.parse(context.getString(R.string.uv_contact_phone_uri)));
+            context.startActivity(intent);
         }
     }
 
+    private final PhoneStateListener phoneListener = new PhoneStateListener() {
+        @Override
+        public void onServiceStateChanged(ServiceState serviceState) {
+            havePhone = serviceState.getState() == ServiceState.STATE_IN_SERVICE;
+        }
+    };
 }

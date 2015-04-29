@@ -111,4 +111,8 @@
     <string name="uv_android_sdk">Android SDK</string>
     <string name="uv_msg_bad_email_format">Please enter a valid email address.</string>
     <string name="uv_ranked">Ranked %1$s</string>
+
+    <string name="uv_write_us">Send us a message</string>
+    <string name="uv_contact_phone">(800) 878–0900</string>
+    <string name="uv_contact_phone_uri">tel:18008780900</string>
 </resources>
