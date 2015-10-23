@@ -115,4 +115,5 @@
     <string name="uv_write_us">Send us a message</string>
     <string name="uv_contact_phone">(800) 878–0900</string>
     <string name="uv_contact_phone_uri">tel:18008780900</string>
+    <string name="uv_help_header">Help</string>
 </resources>

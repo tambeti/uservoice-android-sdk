@@ -15,8 +15,16 @@ import com.uservoice.uservoicesdk.rest.RestResult;
 import com.uservoice.uservoicesdk.ui.DefaultCallback;
 
 public class UserVoice {
+    public interface IHelpLinkClickedCallback {
+        void onHelpLinkClicked(Context context, int index);
+    }
 
     public static void launchUserVoice(Context context) {
+        launchUserVoice(context, null);
+    }
+
+    public static void launchUserVoice(Context context, IHelpLinkClickedCallback helpCallback) {
+        Session.getInstance().setHelpLinkCallback(helpCallback);
         context.startActivity(new Intent(context, PortalActivity.class));
     }
 

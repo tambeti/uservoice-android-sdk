@@ -45,6 +45,14 @@ public class PortalAdapter extends SearchAdapter<BaseModel> implements AdapterVi
     private static int POWERED_BY = 6;
     private static int CONTACT_HEADER = 7;
     private static int CALL = 8;
+    private static int HELP_HEADER = 9;
+    private static int HELP_LINK_1 = 10;
+    private static int HELP_LINK_2 = 11;
+    private static int HELP_LINK_3 = 12;
+    private static int HELP_LINK_4 = 13;
+    private static int HELP_LINK_5 = 14;
+
+    private static int NUM_VIEW_TYPES = 15;
 
     private LayoutInflater inflater;
     private final FragmentActivity context;
@@ -123,6 +131,22 @@ public class PortalAdapter extends SearchAdapter<BaseModel> implements AdapterVi
         if (staticRows == null) {
             staticRows = new ArrayList<Integer>();
             Config config = Session.getInstance().getConfig(context);
+            if (config.getHelpLinks().size() > 0) {
+                staticRows.add(HELP_HEADER);
+                staticRows.add(HELP_LINK_1);
+            }
+            if (config.getHelpLinks().size() > 1) {
+                staticRows.add(HELP_LINK_2);
+            }
+            if (config.getHelpLinks().size() > 2) {
+                staticRows.add(HELP_LINK_3);
+            }
+            if (config.getHelpLinks().size() > 3) {
+                staticRows.add(HELP_LINK_4);
+            }
+            if (config.getHelpLinks().size() > 4) {
+                staticRows.add(HELP_LINK_5);
+            }
             if (config.shouldShowContactUs()) {
                 staticRows.add(CONTACT_HEADER);
                 staticRows.add(CONTACT);
@@ -224,6 +248,7 @@ public class PortalAdapter extends SearchAdapter<BaseModel> implements AdapterVi
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = convertView;
+        Config config = Session.getInstance().getConfig(context);
         int type = getItemViewType(position);
         if (view == null) {
             if (type == LOADING)
@@ -243,6 +268,10 @@ public class PortalAdapter extends SearchAdapter<BaseModel> implements AdapterVi
             else if (type == CONTACT_HEADER)
                 view = inflater.inflate(R.layout.uv_header_item_light, null);
             else if (type == CALL)
+                view = inflater.inflate(R.layout.uv_text_item, null);
+            else if (type == HELP_HEADER)
+                view = inflater.inflate(R.layout.uv_header_item_light, null);
+            else if (type == HELP_LINK_1 || type == HELP_LINK_2 || type == HELP_LINK_3 || type == HELP_LINK_4 || type == HELP_LINK_5)
                 view = inflater.inflate(R.layout.uv_text_item, null);
         }
 
@@ -283,6 +312,29 @@ public class PortalAdapter extends SearchAdapter<BaseModel> implements AdapterVi
             TextView textView = (TextView) view.findViewById(R.id.uv_text);
             textView.setText(R.string.uv_contact_phone);
             view.findViewById(R.id.uv_text2).setVisibility(View.GONE);
+        } else if (type == HELP_HEADER) {
+            TextView textView = (TextView) view.findViewById(R.id.uv_header_text);
+            textView.setText(R.string.uv_help_header);
+        } else if (type == HELP_LINK_1) {
+            TextView textView = (TextView) view.findViewById(R.id.uv_text);
+            textView.setText(config.getHelpLinks().get(0));
+            view.findViewById(R.id.uv_text2).setVisibility(View.GONE);
+        } else if (type == HELP_LINK_2) {
+            TextView textView = (TextView) view.findViewById(R.id.uv_text);
+            textView.setText(config.getHelpLinks().get(1));
+            view.findViewById(R.id.uv_text2).setVisibility(View.GONE);
+        } else if (type == HELP_LINK_3) {
+            TextView textView = (TextView) view.findViewById(R.id.uv_text);
+            textView.setText(config.getHelpLinks().get(2));
+            view.findViewById(R.id.uv_text2).setVisibility(View.GONE);
+        } else if (type == HELP_LINK_4) {
+            TextView textView = (TextView) view.findViewById(R.id.uv_text);
+            textView.setText(config.getHelpLinks().get(3));
+            view.findViewById(R.id.uv_text2).setVisibility(View.GONE);
+        } else if (type == HELP_LINK_5) {
+            TextView textView = (TextView) view.findViewById(R.id.uv_text);
+            textView.setText(config.getHelpLinks().get(4));
+            view.findViewById(R.id.uv_text2).setVisibility(View.GONE);
         }
 
         View divider = view.findViewById(R.id.uv_divider);
@@ -296,7 +348,7 @@ public class PortalAdapter extends SearchAdapter<BaseModel> implements AdapterVi
 
     @Override
     public int getViewTypeCount() {
-        return 9;
+        return NUM_VIEW_TYPES;
     }
 
     @Override
@@ -325,6 +377,7 @@ public class PortalAdapter extends SearchAdapter<BaseModel> implements AdapterVi
 
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         int type = getItemViewType(position);
+        UserVoice.IHelpLinkClickedCallback helpCallback = Session.getInstance().getHelpLinkCallback();
         if (type == CONTACT) {
             context.startActivity(new Intent(context, ContactActivity.class));
         } else if (type == FORUM) {
@@ -335,6 +388,16 @@ public class PortalAdapter extends SearchAdapter<BaseModel> implements AdapterVi
             final Intent intent = new Intent(Intent.ACTION_DIAL);
             intent.setData(Uri.parse(context.getString(R.string.uv_contact_phone_uri)));
             context.startActivity(intent);
+        } else if (type == HELP_LINK_1 && helpCallback != null) {
+            helpCallback.onHelpLinkClicked(context, 0);
+        } else if (type == HELP_LINK_2 && helpCallback != null) {
+            helpCallback.onHelpLinkClicked(context, 1);
+        } else if (type == HELP_LINK_3 && helpCallback != null) {
+            helpCallback.onHelpLinkClicked(context, 2);
+        } else if (type == HELP_LINK_4 && helpCallback != null) {
+            helpCallback.onHelpLinkClicked(context, 3);
+        } else if (type == HELP_LINK_5 && helpCallback != null) {
+            helpCallback.onHelpLinkClicked(context, 4);
         }
     }
 

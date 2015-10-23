@@ -47,6 +47,7 @@ public class Session {
     private List<Topic> topics;
     private Map<String, String> externalIds = new HashMap<>();
     private Runnable signinListener;
+    private UserVoice.IHelpLinkClickedCallback helpLinkCallback;
 
     public Config getConfig(Context context) {
         if (config == null && context != null) {
@@ -177,5 +178,13 @@ public class Session {
 
     public void setSignInListener(Runnable runnable) {
         signinListener = runnable;
+    }
+
+    public UserVoice.IHelpLinkClickedCallback getHelpLinkCallback() {
+        return helpLinkCallback;
+    }
+
+    public void setHelpLinkCallback(UserVoice.IHelpLinkClickedCallback helpCallback) {
+        this.helpLinkCallback = helpCallback;
     }
 }

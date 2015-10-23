@@ -1,19 +1,14 @@
 package com.uservoice.uservoicesdk;
 
-import android.content.SharedPreferences;
-import android.util.Log;
-
 import com.uservoice.uservoicesdk.model.Attachment;
 import com.uservoice.uservoicesdk.model.BaseModel;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +28,7 @@ public class Config extends BaseModel {
     private boolean showKnowledgeBase = true;
     private Map<String, Object> userTraits = new HashMap<String, Object>();
     private List<Attachment> attachmentList = new ArrayList<Attachment>();
+    private List<String> helpLinks = new ArrayList<String>();
 
     public Config() {}
 
@@ -147,6 +143,14 @@ public class Config extends BaseModel {
         putUserTrait("id", id);
         putUserTrait("name", name);
         putUserTrait("email", email);
+    }
+
+    public List<String> getHelpLinks() {
+        return helpLinks;
+    }
+
+    public void setHelpLinks(List<String> helpLinks) {
+        this.helpLinks = helpLinks;
     }
 
     public void putUserTrait(String key, String value) {
