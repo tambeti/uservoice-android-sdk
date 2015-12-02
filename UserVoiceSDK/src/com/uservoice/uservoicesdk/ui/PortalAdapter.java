@@ -147,11 +147,12 @@ public class PortalAdapter extends SearchAdapter<BaseModel> implements AdapterVi
             if (config.getHelpLinks().size() > 4) {
                 staticRows.add(HELP_LINK_5);
             }
-            if (config.shouldShowContactUs()) {
+            //if (config.shouldShowContactUs()) {
                 staticRows.add(CONTACT_HEADER);
                 staticRows.add(CONTACT);
                 staticRows.add(CALL);
-            } if (config.shouldShowForum())
+            //}
+            if (config.shouldShowForum())
                 staticRows.add(FORUM);
             if (config.shouldShowKnowledgeBase())
                 staticRows.add(KB_HEADER);
